@@ -1,18 +1,18 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import _db from "./_db";
+import db from "./db";
 // types
 import { typeDefs } from "./schema";
 const resolvers = {
     Query: {
         movies() {
-            return _db.movies;
+            return db.movies;
         },
         reviews() {
-            return _db.reviews;
+            return db.reviews;
         },
         authors() {
-            return _db.authors;
+            return db.authors;
         },
     },
 };
