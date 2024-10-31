@@ -117,11 +117,11 @@ query ReviewWithAuthorNameQuery { // all reviews for game 2 with author's name a
 
 GraphQL has 5 basic scalar types that we can use
 
-* int: interger numbers
-* float: decimal numbers
-* string: characters
-* boolean: T/F
-* ID: spedial id type to use as a key for data objects. these are serialized strings
+- int: interger numbers
+- float: decimal numbers
+- string: characters
+- boolean: T/F
+- ID: spedial id type to use as a key for data objects. these are serialized strings
 
 type defs look like this:
 
@@ -144,12 +144,13 @@ export const typeDefs = `#graphql
     verified: Boolean!
   }
 
-`
+`;
 // the first exclamation mark says that the string contained in the array cannot be nullish
 // the second exclamation mark says that the array cannot be nullish
 ```
 
 # The mandatory Type in all graphQL schemas
+
 The query type defines the entry points to the graph and specify the return types of those entry points
 
 ```ts
@@ -164,3 +165,60 @@ The schema is a map and the resolver functions actually handle queries according
 
 https://www.youtube.com/watch?v=mjqfYgFyziU
 https://www.apollographql.com/docs/apollo-server/api/standalone
+
+with this error:
+
+```plain
+node:internal/errors:496
+    ErrorCaptureStackTrace(err);
+    ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/carrots/open_source/graphql/graphql-trial/graphql-server/dist/db' imported from /home/carrots/open_source/graphql/graphql-trial/graphql-server/dist/index.js
+```
+
+The solution was to update the imports from:
+`import db from "./db";` to `import db from "./db.js";`
+
+# Entering based on a single parameter instead of lists of data
+
+We need to manually add the ability to enter a graph on a single point such as: `movie(id:"2")`
+
+```ts
+type Query {
+  reviews: [Review]
+  movies: [Movie]
+  authors: [Author]
+}
+
+type Query {
+  reviews: [Review]
+  review(id: ID!): Review
+  movies: [Movie]
+  movie(id: ID!): Movie
+  authors: [Author]
+  author(id: ID!): Author
+}
+```
+
+and we must also add the appropriate resolver function for this:
+
+```ts
+const resolvers = {
+  Query: {
+    reviews() {
+      return db.reviews; // generic one
+    },
+    review(_, args) {
+      return db.reviews.find((review) => review.id === args.id);
+      // or alternatively
+      return db.reviews.find((review) => {
+        if (review.id === args.id) {
+          return true; // makes find send the review
+        } else {
+          return false;
+        }
+      });
+    },
+  },
+};
+```
