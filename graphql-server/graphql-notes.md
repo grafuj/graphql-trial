@@ -222,3 +222,64 @@ const resolvers = {
   },
 };
 ```
+
+# add linking to our data so we can get all reviews for a movie:
+
+```ts
+type Movie {
+    id: ID!
+    title: String!
+    platform: [String!]!
+    reviews: [Review!]
+  }
+  type Review {
+    id: ID!
+    rating: Int!
+    content: String!
+    movie: Movie!
+    author: Author!
+  }
+  type Author {
+    id: ID!
+    name: String!
+    verified: Boolean!
+    reviews: [Review!]
+  }
+```
+
+## add new entry to resolvers for getting more than just a simple point
+
+```ts
+const resolvers = {
+  Query: {
+    // all the stuff
+  },
+  Movie {
+    reviews(parent: Movie){
+      return db.reviews.filter((review) => review.movie_id === parent.id)
+    }
+  }
+```
+
+And we can do the same for the other two:
+
+```ts
+Movie: {
+    reviews(parent) {
+      return db.reviews.filter((review) => review.movie_id === parent.id);
+    },
+  },
+  Author: {
+    reviews(parent) {
+      return db.reviews.filter((review) => review.author_id === parent.id);
+    },
+  },
+  Review: {
+    author(parent) {
+      return db.authors.find((author) => author.id === parent.author_id);
+    },
+    movie(parent) {
+      return db.movies.find((movie) => movie.id === parent.movie_id);
+    },
+  },
+```
